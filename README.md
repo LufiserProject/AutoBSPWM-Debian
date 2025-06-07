@@ -13,7 +13,7 @@ sudo apt upgrade -y
 
 ```shell
 git clone https://github.com/LufiserProject/AutoBSPWM-Debian
-cd auto-bspwm
+cd AutoBSPWM-Debian
 ```
 
 3. Grant execution permissions to the script.

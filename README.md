@@ -1,5 +1,5 @@
 # auto-bspwm
-> This is a Bash script that automates the setup of a professional hacking environment for Kali Linux using the tiled window manager [bspwm](https://github.com/baskerville/bspwm).
+> This is a Bash script that automates the setup of a professional hacking environment for Debian using the tiled window manager [bspwm](https://github.com/baskerville/bspwm).
 
 ## Installation
 1. Install available updates.

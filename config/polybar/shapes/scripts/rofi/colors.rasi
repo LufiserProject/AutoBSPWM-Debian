@@ -1,0 +1,37 @@
+/* Tema Rofi ThinkPad - Colores rojizos */
+
+* {
+    /* Colores base */
+    background:     #2a1a1aFF;
+    foreground:     #e0a0a0FF;
+    border-color:   #c05050FF;
+    selected:       #c05050FF;
+    
+    /* Elementos activos/inactivos */
+    active-background: #3a2020FF;
+    active-foreground: #ff9090FF;
+    urgent-background: #5a3030FF;
+    urgent-foreground: #e07070FF;
+    
+    /* Componentes */
+    background-color:   @background;
+    text-color:         @foreground;
+    button-background:  #3a2020FF;
+    button-foreground:  #d0b0b0FF;
+    
+    /* Listado */
+    list-background:    @background;
+    list-foreground:    @foreground;
+    
+    /* Modo ventana */
+    window-background:  @background;
+    window-foreground:  @foreground;
+
+    /* Legacy compatibility */
+    al:    #00000000;
+    bg:    @background;
+    bg1:   @active-background;
+    bg2:   @button-background;
+    bg3:   @selected;
+    fg:    @foreground;
+}

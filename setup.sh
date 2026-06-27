@@ -49,7 +49,7 @@ function install_zsh_plugins() {
     # Install zsh-syntax-highlighting
     if [ ! -d "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting" ]; then
         echo -e "${yellowColour}[*] Installing zsh-syntax-highlighting...${endColour}"
-        git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting"
+        git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting" || { echo -e "${redColour}[!] Failed to clone zsh-syntax-highlighting${endColour}"; exit 1; }
     else
         echo -e "${greenColour}[+] zsh-syntax-highlighting already installed${endColour}"
     fi
@@ -57,7 +57,7 @@ function install_zsh_plugins() {
     # Install zsh-autosuggestions
     if [ ! -d "${ZSH_CUSTOM}/plugins/zsh-autosuggestions" ]; then
         echo -e "${yellowColour}[*] Installing zsh-autosuggestions...${endColour}"
-        git clone https://github.com/zsh-users/zsh-autosuggestions.git "${ZSH_CUSTOM}/plugins/zsh-autosuggestions"
+        git clone https://github.com/zsh-users/zsh-autosuggestions.git "${ZSH_CUSTOM}/plugins/zsh-autosuggestions" || { echo -e "${redColour}[!] Failed to clone zsh-autosuggestions${endColour}"; exit 1; }
     else
         echo -e "${greenColour}[+] zsh-autosuggestions already installed${endColour}"
     fi
@@ -65,7 +65,7 @@ function install_zsh_plugins() {
     # Install history-substring-search
     if [ ! -d "${ZSH_CUSTOM}/plugins/history-substring-search" ]; then
         echo -e "${yellowColour}[*] Installing history-substring-search...${endColour}"
-        git clone https://github.com/zsh-users/zsh-history-substring-search "${ZSH_CUSTOM}/plugins/history-substring-search"
+        git clone https://github.com/zsh-users/zsh-history-substring-search "${ZSH_CUSTOM}/plugins/history-substring-search" || { echo -e "${redColour}[!] Failed to clone history-substring-search${endColour}"; exit 1; }
     else
         echo -e "${greenColour}[+] history-substring-search already installed${endColour}"
     fi
@@ -75,7 +75,7 @@ function install_zsh_packages() {
     echo -e "\n${purpleColour}[*] Installing ZSH and related packages for Debian...${endColour}"
     
     # Install ZSH and required packages
-    sudo apt-get install -y zsh fonts-powerline
+    sudo apt-get install -y zsh fonts-powerline || { echo -e "${redColour}[!] Failed to install ZSH packages${endColour}"; exit 1; }
     
     # Set ZSH as default shell (only if not already set)
     if [ "$SHELL" != "/usr/bin/zsh" ]; then
@@ -100,8 +100,8 @@ function configure_ohmyzsh() {
     # Verify installation
     if [ ! -f "$OH_MY_ZSH_DIR/oh-my-zsh.sh" ]; then
         echo -e "${redColour}[!] Oh My Zsh installation failed, trying alternative method...${endColour}"
-        git clone https://github.com/ohmyzsh/ohmyzsh.git "$OH_MY_ZSH_DIR"
-        cp "$OH_MY_ZSH_DIR/templates/zshrc.zsh-template" "$HOME/.zshrc"
+        git clone https://github.com/ohmyzsh/ohmyzsh.git "$OH_MY_ZSH_DIR" || { echo -e "${redColour}[!] Failed to clone Oh My Zsh repository${endColour}"; exit 1; }
+        cp "$OH_MY_ZSH_DIR/templates/zshrc.zsh-template" "$HOME/.zshrc" || { echo -e "${redColour}[!] Failed to copy .zshrc template${endColour}"; exit 1; }
     fi
     
     # Install plugins
@@ -168,7 +168,7 @@ alias ls='lsd'
 alias ll='ls -l'
 alias la='ls -a'
 alias lla='ls -la'
-alias cat='bat'
+alias cat='batcat'
 
 # Safety features
 alias rm='rm -i'
@@ -275,16 +275,10 @@ EOF
 function configure_root_zsh() {
     echo -e "\n${purpleColour}[*] Configuring ZSH for root...${endColour}"
     
-    # Install Oh My Zsh for root
+    # Install Oh My Zsh for root by copying the user's pre-configured folder
     sudo rm -rf /root/.oh-my-zsh
-    sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-    
-    # Install Powerlevel10k for root
-    sudo git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /root/.oh-my-zsh/custom/themes/powerlevel10k
-    
-    # Install plugins for root
-    sudo git clone https://github.com/zsh-users/zsh-syntax-highlighting.git /root/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
-    sudo git clone https://github.com/zsh-users/zsh-autosuggestions.git /root/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+    sudo cp -r "$OH_MY_ZSH_DIR" /root/.oh-my-zsh
+    sudo chown -R root:root /root/.oh-my-zsh
     
     # Create root .zshrc
     sudo tee /root/.zshrc > /dev/null << 'EOF'
@@ -576,26 +570,26 @@ function main_install(){
     fi
 
     echo -e "\n\n${blueColour}[*] Installing required packages...\n${endColour}"
-    sudo apt-get update
-    sudo apt-get install -y kitty rofi feh xclip ranger i3lock scrot scrub wmname imagemagick cmatrix htop neofetch python3-pip procps tty-clock fzf lsd bat pamixer flameshot fonts-font-awesome fonts-noto-color-emoji
+    sudo apt-get update || { echo -e "${redColour}[!] apt-get update failed${endColour}"; exit 1; }
     
-    echo -e "\n${blueColour}[*] Installing dependencies for bspwm, polybar and picom...\n${endColour}"
-    sudo apt-get install -y build-essential git vim libxcb-util0-dev libxcb-ewmh-dev libxcb-randr0-dev libxcb-icccm4-dev libxcb-keysyms1-dev libxcb-xinerama0-dev libasound2-dev libxcb-xtest0-dev libxcb-shape0-dev libuv1-dev cmake cmake-data pkg-config python3-sphinx libcairo2-dev libxcb1-dev libxcb-util0-dev libxcb-randr0-dev libxcb-composite0-dev python3-xcbgen xcb-proto libxcb-image0-dev libxcb-ewmh-dev libxcb-icccm4-dev libxcb-xkb-dev libxcb-xrm-dev libxcb-cursor-dev libasound2-dev libpulse-dev libjsoncpp-dev libmpdclient-dev libcurl4-openssl-dev libnl-genl-3-dev meson libxext-dev libxcb1-dev libxcb-damage0-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-render-util0-dev libxcb-render0-dev libxcb-randr0-dev libxcb-composite0-dev libxcb-image0-dev libxcb-present-dev libxcb-xinerama0-dev libpixman-1-dev libdbus-1-dev libconfig-dev libgl1-mesa-dev libpcre2-dev libpcre3-dev libevdev-dev uthash-dev libev-dev libx11-xcb-dev libxcb-glx0-dev
-
-    echo -e "\n${blueColour}[*] Installing and configuring tools...\n${endColour}"
-    mkdir -p ~/tools && cd ~/tools
+    # Check if fastfetch is available in the repositories (Debian 13/Sid)
+    if apt-cache show fastfetch >/dev/null 2>&1; then
+        fastfetch_package="fastfetch"
+    else
+        fastfetch_package=""
+    fi
     
-    # Install bspwm
-    git clone https://github.com/baskerville/bspwm.git && cd bspwm && make -j$(nproc) && sudo make install && sudo apt-get install -y bspwm && cd ..
+    # Install core packages (using i3lock-fancy instead of i3lock, and conditional fastfetch)
+    sudo apt-get install -y xorg lightdm lightdm-gtk-greeter kitty rofi feh xclip ranger i3lock-fancy scrot scrub wmname imagemagick cmatrix htop $fastfetch_package python3-pip procps tty-clock fzf lsd bat pamixer flameshot fonts-font-awesome fonts-noto-color-emoji curl build-essential git vim || { echo -e "${redColour}[!] Failed to install core packages${endColour}"; exit 1; }
     
-    # Install sxhkd
-    git clone https://github.com/baskerville/sxhkd.git && cd sxhkd && make -j$(nproc) && sudo make install && cd ..
+    # Fallback if fastfetch is missing
+    if [ -z "$fastfetch_package" ]; then
+        echo -e "${yellowColour}[*] fastfetch not found in repositories, installing neofetch as fallback...${endColour}"
+        sudo apt-get install -y neofetch || echo -e "${redColour}[!] Failed to install neofetch, skipping system info tool${endColour}"
+    fi
     
-    # Install polybar
-    git clone --recursive https://github.com/polybar/polybar && cd polybar && mkdir build && cd build && cmake .. && make -j$(nproc) && sudo make install && cd ../../
-    
-    # Install picom
-    git clone https://github.com/ibhagwan/picom.git && cd picom && git submodule update --init --recursive && meson --buildtype=release . build && ninja -C build && sudo ninja -C build install && cd ..
+    echo -e "\n${blueColour}[*] Installing bspwm, sxhkd, polybar and picom from official repositories...\n${endColour}"
+    sudo apt-get install -y bspwm sxhkd polybar picom || { echo -e "${redColour}[!] Failed to install window manager packages from repositories${endColour}"; exit 1; }
 
     # Setup terminal environment
     setup_terminal_environment
@@ -604,9 +598,9 @@ function main_install(){
     configure_rofi
     
     echo -e "\n${blueColour}[*] Setting up files and permissions...\n${endColour}"
-    mkdir -p "$fdir" && cp -rv $dir/fonts/* "$fdir" 2>/dev/null || echo -e "${yellowColour}[!] Fonts directory not found${endColour}"
-    mkdir -p ~/Wallpapers && cp -rv $dir/wallpapers/* ~/Wallpapers 2>/dev/null || echo -e "${yellowColour}[!] Wallpapers directory not found${endColour}"
-    cp -rv $dir/config/* ~/.config/ 2>/dev/null || echo -e "${yellowColour}[!] Config directory not found${endColour}"
+    mkdir -p "$fdir" && cp -rv "$dir"/fonts/* "$fdir" 2>/dev/null || echo -e "${yellowColour}[!] Fonts directory not found${endColour}"
+    mkdir -p ~/Wallpapers && cp -rv "$dir"/wallpapers/* ~/Wallpapers 2>/dev/null || echo -e "${yellowColour}[!] Wallpapers directory not found${endColour}"
+    cp -rv "$dir"/config/* ~/.config/ 2>/dev/null || echo -e "${yellowColour}[!] Config directory not found${endColour}"
     
     # Create Polybar scripts
     create_eth_script
@@ -620,7 +614,7 @@ function main_install(){
     
     # Install whichSystem.py if exists
     if [ -f "$dir/scripts/whichSystem.py" ]; then
-        sudo cp -v $dir/scripts/whichSystem.py /usr/local/bin/
+        sudo cp -v "$dir"/scripts/whichSystem.py /usr/local/bin/
         sudo chmod +x /usr/local/bin/whichSystem.py
     fi
     
@@ -631,7 +625,7 @@ function main_install(){
     
     # Cleanup
     rm -rfv ~/tools
-    rm -rfv $dir
+    rm -rfv "$dir"
     
     # Ask for reboot
     while true; do
